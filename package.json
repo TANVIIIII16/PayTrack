@@ -1,0 +1,27 @@
+{
+  "name": "EduPay",
+  "version": "0.0.1",
+  "description": "Simple Express.js school payment API",
+  "author": "",
+  "private": true,
+  "license": "UNLICENSED",
+  "scripts": {
+    "start": "node simple-server.js",
+    "dev": "nodemon simple-server.js",
+    "format": "prettier --write \"**/*.js\""
+  },
+  "dependencies": {
+    "axios": "^1.11.0",
+    "bcryptjs": "^3.0.2",
+    "cors": "^2.8.5",
+    "dotenv": "^17.2.2",
+    "express": "^5.1.0",
+    "jsonwebtoken": "^9.0.2",
+    "mongoose": "^8.18.0",
+    "uuid": "^12.0.0"
+  },
+  "devDependencies": {
+    "nodemon": "3.1.10",
+    "prettier": "3.6.2"
+  }
+}
