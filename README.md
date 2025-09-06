@@ -1,132 +1,155 @@
-# School Payment API
+# EduPay Backend API
 
-A simple Express.js API for managing school payments and transactions with MongoDB.
+An industrial-grade Express.js school payment API with clean architecture, built for managing school payment transactions, user authentication, and payment gateway integrations.
 
-## Features
+## 🚀 Features
 
-- 🔐 JWT Authentication & Authorization
-- 💳 Payment Gateway Integration
-- 📊 Transaction Management with Aggregation
-- 🔗 Webhook Processing
-- 📈 Pagination & Sorting
-- 🛡️ Data Validation & Error Handling
-- 📝 Comprehensive Logging
+- **Clean Architecture**: Modular structure with separation of concerns
+- **Authentication & Authorization**: JWT-based auth with role-based access control
+- **Payment Processing**: Support for multiple payment gateways (PhonePe, Razorpay, PayU, etc.)
+- **Transaction Management**: Complete transaction lifecycle management
+- **Webhook Support**: Real-time payment status updates
+- **Data Validation**: Comprehensive input validation using express-validator
+- **Error Handling**: Centralized error handling with proper HTTP status codes
+- **Logging**: Structured logging with different log levels
+- **Database**: MongoDB with Mongoose ODM
+- **Security**: Password hashing, CORS protection, input sanitization
 
-## Tech Stack
+## 📁 Project Structure
 
-- **Framework**: Express.js (Node.js)
-- **Database**: MongoDB with Mongoose
-- **Authentication**: JWT
-- **HTTP Client**: Axios
-- **Package Manager**: npm/pnpm
-
-## Prerequisites
-
-- Node.js (v16 or higher)
-- MongoDB Atlas account or local MongoDB instance
-
-## Installation
-
-1. Clone the repository:
-
-```bash
-git clone <repository-url>
-cd school-payment-api
+```
+EduPay-Backend/
+├── src/
+│   ├── config/           # Configuration files
+│   │   ├── database.js   # Database connection
+│   │   └── index.js      # App configuration
+│   ├── controllers/      # Business logic controllers
+│   │   ├── authController.js
+│   │   ├── paymentController.js
+│   │   ├── transactionController.js
+│   │   └── webhookController.js
+│   ├── middleware/       # Custom middleware
+│   │   ├── auth.js       # Authentication middleware
+│   │   ├── errorHandler.js
+│   │   └── validation.js # Input validation
+│   ├── models/          # Database models
+│   │   ├── User.js
+│   │   ├── Order.js
+│   │   ├── OrderStatus.js
+│   │   └── WebhookLogs.js
+│   ├── routes/          # API routes
+│   │   ├── auth.js
+│   │   ├── payment.js
+│   │   ├── transaction.js
+│   │   ├── webhook.js
+│   │   └── index.js
+│   ├── utils/           # Utility functions
+│   │   ├── constants.js
+│   │   ├── logger.js
+│   │   └── response.js
+│   └── app.js           # Express app configuration
+├── server.js            # Server entry point
+├── package.json
+├── .env.example
+├── .eslintrc.js
+├── .prettierrc
+└── jest.config.js
 ```
 
-2. Install dependencies:
+## 🛠️ Installation
 
-```bash
-npm install
-# or
-pnpm install
-```
+1. **Clone the repository**
+   ```bash
+   git clone <repository-url>
+   cd EduPay-Backend
+   ```
 
-3. Create a `.env` file with your configuration:
+2. **Install dependencies**
+   ```bash
+   npm install
+   ```
 
-```env
-# Database Configuration
-MONGODB_URI=mongodb+srv://your-username:your-password@your-cluster.mongodb.net/school-payment-db?retryWrites=true&w=majority
+3. **Environment Setup**
+   ```bash
+   cp .env.example .env
+   ```
+   Update the `.env` file with your configuration values.
 
-# JWT Configuration
-JWT_SECRET=your-super-secret-jwt-key-here
-JWT_EXPIRES_IN=24h
+4. **Start the application**
+   ```bash
+   # Development mode
+   npm run dev
+   
+   # Production mode
+   npm start
+   ```
 
-# Payment Gateway Configuration
-PG_KEY=edvtest01
-API_KEY=your-api-key-here
-SCHOOL_ID=65b0e6293e9f76a9694d84b4
-PAYMENT_API_URL=https://api.payment-gateway.com
+## 🔧 Configuration
 
-# Server Configuration
-PORT=3000
-NODE_ENV=development
-```
+### Environment Variables
 
-4. Start the server:
+| Variable | Description | Default |
+|----------|-------------|---------|
+| `NODE_ENV` | Environment (development/production) | development |
+| `PORT` | Server port | 3000 |
+| `MONGODB_URI` | MongoDB connection string | mongodb://localhost:27017/school-payment-db |
+| `JWT_SECRET` | JWT secret key | - |
+| `JWT_EXPIRES_IN` | JWT expiration time | 24h |
+| `PG_KEY` | Payment gateway key | - |
+| `API_KEY` | API key for payment gateway | - |
+| `SCHOOL_ID` | School identifier | - |
+| `CORS_ORIGIN` | CORS allowed origins | * |
 
-```bash
-# Production
-npm start
+## 📚 API Documentation
 
-# Development with auto-reload
-npm run dev
-```
-
-## API Endpoints
-
-### Authentication
+### Authentication Endpoints
 
 #### Register User
-
 ```http
-POST /auth/register
+POST /api/auth/register
 Content-Type: application/json
 
 {
   "username": "john_doe",
   "email": "john@example.com",
-  "password": "password123",
+  "password": "SecurePass123",
   "role": "school_admin",
-  "school_id": "65b0e6293e9f76a9694d84b4"
+  "school_id": "school123"
 }
 ```
 
 #### Login
-
 ```http
-POST /auth/login
+POST /api/auth/login
 Content-Type: application/json
 
 {
   "email": "john@example.com",
-  "password": "password123"
+  "password": "SecurePass123"
 }
 ```
 
 #### Get Profile
-
 ```http
-GET /auth/profile
-Authorization: Bearer <jwt-token>
+GET /api/auth/profile
+Authorization: Bearer <token>
 ```
 
-### Payment
+### Payment Endpoints
 
 #### Create Payment
-
 ```http
-POST /payment/create-payment
-Authorization: Bearer <jwt-token>
+POST /api/payment/create-payment
+Authorization: Bearer <token>
 Content-Type: application/json
 
 {
-  "school_id": "65b0e6293e9f76a9694d84b4",
-  "trustee_id": "65b0e552dd31950a9b41c5ba",
+  "school_id": "school123",
+  "trustee_id": "trustee456",
   "student_info": {
     "name": "John Doe",
     "id": "STU001",
-    "email": "john.doe@school.com"
+    "email": "john@school.com"
   },
   "gateway_name": "PhonePe",
   "order_amount": 2000
@@ -134,233 +157,128 @@ Content-Type: application/json
 ```
 
 #### Get Payment Status
-
 ```http
-GET /payment/status/{customOrderId}
-Authorization: Bearer <jwt-token>
+GET /api/payment/status/:customOrderId
+Authorization: Bearer <token>
 ```
 
-### Transactions
+### Transaction Endpoints
 
 #### Get All Transactions
-
 ```http
-GET /transactions?page=1&limit=10&sortBy=payment_time&sortOrder=desc
-Authorization: Bearer <jwt-token>
+GET /api/transactions?page=1&limit=10&sortBy=payment_time&sortOrder=desc
+Authorization: Bearer <token>
 ```
 
-#### Get Transactions by School
-
+#### Get School Transactions
 ```http
-GET /transactions/school/{schoolId}?page=1&limit=10&sortBy=payment_time&sortOrder=desc
-Authorization: Bearer <jwt-token>
+GET /api/transactions/school/:schoolId?page=1&limit=10
+Authorization: Bearer <token>
 ```
 
 #### Get Transaction Status
-
 ```http
-GET /transactions/status/{customOrderId}
-Authorization: Bearer <jwt-token>
+GET /api/transactions/status/:customOrderId
+Authorization: Bearer <token>
 ```
 
-#### Create Dummy Data
+### Webhook Endpoints
 
+#### Process Payment Webhook
 ```http
-POST /transactions/dummy-data
-Authorization: Bearer <jwt-token>
-```
-
-### Webhook
-
-#### Process Webhook
-
-```http
-POST /webhook
+POST /api/webhook
 Content-Type: application/json
 
 {
-  "status": 200,
   "order_info": {
-    "order_id": "ORDER_001",
+    "order_id": "ORDER_123",
     "order_amount": 2000,
-    "transaction_amount": 2200,
-    "gateway": "PhonePe",
-    "bank_reference": "YESBNK222",
-    "status": "success",
+    "transaction_amount": 2000,
     "payment_mode": "upi",
     "payemnt_details": "success@ybl",
+    "bank_reference": "YESBNK222",
     "Payment_message": "payment success",
-    "payment_time": "2025-04-23T08:14:21.945+00:00",
-    "error_message": "NA"
+    "status": "success",
+    "error_message": "NA",
+    "payment_time": "2024-01-01T10:00:00Z"
   }
 }
 ```
 
-## Database Schemas
+## 🔐 User Roles
 
-### Order Schema
+- **admin**: Full system access
+- **school_admin**: School-specific access
+- **trustee**: Limited access to specific transactions
 
-```javascript
-{
-  _id: ObjectId,
-  school_id: ObjectId,
-  trustee_id: ObjectId,
-  student_info: {
-    name: String,
-    id: String,
-    email: String
-  },
-  gateway_name: String,
-  custom_order_id: String
-}
-```
-
-### Order Status Schema
-
-```javascript
-{
-  _id: ObjectId,
-  collect_id: ObjectId (Reference to Order),
-  order_amount: Number,
-  transaction_amount: Number,
-  payment_mode: String,
-  payment_details: String,
-  bank_reference: String,
-  payment_message: String,
-  status: String,
-  error_message: String,
-  payment_time: Date
-}
-```
-
-### Webhook Logs Schema
-
-```javascript
-{
-  _id: ObjectId,
-  order_id: String,
-  webhook_payload: Mixed,
-  status: String,
-  processed_at: Date,
-  error_message: String
-}
-```
-
-### User Schema
-
-```javascript
-{
-  _id: ObjectId,
-  username: String,
-  email: String,
-  password: String,
-  role: String,
-  school_id: ObjectId,
-  is_active: Boolean
-}
-```
-
-## Features in Detail
-
-### 🔐 JWT Authentication
-
-- Secure user registration and login
-- JWT token-based authentication
-- Role-based access control
-- Password hashing with bcryptjs
-
-### 💳 Payment Gateway Integration
-
-- Integration with external payment APIs
-- JWT-signed payloads for security
-- Automatic payment page redirection
-- Transaction status tracking
-
-### 📊 Advanced Transaction Management
-
-- MongoDB aggregation pipelines for complex queries
-- Pagination support with configurable limits
-- Sorting by multiple fields (payment_time, status, amount)
-- School-specific transaction filtering
-
-### 🔗 Webhook Processing
-
-- Secure webhook endpoint for payment updates
-- Automatic order status updates
-- Comprehensive webhook logging
-- Error handling and retry mechanisms
-
-### 🛡️ Security Features
-
-- Input validation using class-validator
-- CORS configuration
-- JWT token validation
-- Password hashing
-- SQL injection prevention
-
-### 📈 Performance Optimizations
-
-- Database indexing on critical fields
-- Pagination for large datasets
-- Efficient aggregation queries
-- Connection pooling
-
-## Testing
-
-### Quick Test Commands
+## 🧪 Testing
 
 ```bash
-# Health Check
-curl http://localhost:3000/health
+# Run tests
+npm test
 
-# Register User
-curl -X POST http://localhost:3000/auth/register \
-  -H "Content-Type: application/json" \
-  -d '{"username":"testuser","email":"test@example.com","password":"password123","role":"school_admin","school_id":"65b0e6293e9f76a9694d84b4"}'
+# Run tests in watch mode
+npm run test:watch
+
+# Run tests with coverage
+npm run test -- --coverage
 ```
 
-## Error Handling
-
-The API provides comprehensive error handling with:
-
-- HTTP status codes
-- Descriptive error messages
-- Validation error details
-- Database error handling
-- Payment gateway error handling
-
-## Logging
-
-- Webhook events are logged for audit trails
-- Failed transactions are tracked
-- Error messages are stored for debugging
-- Request/response logging for monitoring
-
-## Local Development
+## 📝 Code Quality
 
 ```bash
-# Install dependencies
-npm install
+# Format code
+npm run format
 
-# Create environment file
-# Copy the .env example above and update with your values
+# Lint code
+npm run lint
 
-# Start development server
-npm run dev
+# Fix linting issues
+npm run lint:fix
 ```
 
-## Contributing
+## 🚀 Deployment
+
+### Production Checklist
+
+1. Set `NODE_ENV=production`
+2. Use strong JWT secrets
+3. Configure proper CORS origins
+4. Set up MongoDB with authentication
+5. Use environment-specific configurations
+6. Enable logging and monitoring
+7. Set up SSL/TLS certificates
+
+### Docker Deployment
+
+```dockerfile
+FROM node:18-alpine
+WORKDIR /app
+COPY package*.json ./
+RUN npm ci --only=production
+COPY . .
+EXPOSE 3000
+CMD ["npm", "start"]
+```
+
+## 🤝 Contributing
 
 1. Fork the repository
 2. Create a feature branch
 3. Make your changes
-4. Add tests if applicable
-5. Submit a pull request
+4. Add tests for new functionality
+5. Ensure all tests pass
+6. Submit a pull request
 
-## License
+## 📄 License
 
-This project is licensed under the MIT License.
+This project is licensed under the UNLICENSED License.
 
-## Support
+## 🆘 Support
 
-For support and questions, please contact the development team.
+For support and questions, please contact the development team or create an issue in the repository.
+
+## 🔄 Version History
+
+- **v1.0.0**: Initial release with clean architecture
+- **v0.0.1**: Legacy single-file implementation
