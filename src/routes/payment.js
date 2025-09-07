@@ -14,4 +14,9 @@ router.post('/create-payment', authenticateToken, validatePaymentCreation, payme
 // @access  Private
 router.get('/status/:customOrderId', authenticateToken, paymentController.getPaymentStatus);
 
+// @route   POST /api/payment/callback
+// @desc    Handle payment completion callback
+// @access  Public
+router.post('/callback', paymentController.handlePaymentCallback);
+
 module.exports = router;

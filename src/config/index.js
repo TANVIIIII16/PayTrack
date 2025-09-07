@@ -13,6 +13,7 @@ const config = {
   
   // Payment Gateway
   pgKey: process.env.PG_KEY,
+  pgSecretKey: process.env.PG_SECRET_KEY,
   apiKey: process.env.API_KEY,
   schoolId: process.env.SCHOOL_ID,
   

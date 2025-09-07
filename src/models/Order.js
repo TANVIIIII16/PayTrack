@@ -43,6 +43,23 @@ const orderSchema = new mongoose.Schema({
     unique: true, 
     required: true,
     trim: true
+  },
+  order_amount: {
+    type: Number,
+    required: true,
+    min: 0
+  },
+  callback_url: {
+    type: String,
+    trim: true
+  },
+  external_collect_id: {
+    type: String,
+    trim: true
+  },
+  external_payment_url: {
+    type: String,
+    trim: true
   }
 }, { 
   timestamps: true 
