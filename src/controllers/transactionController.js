@@ -14,17 +14,16 @@ const getTransactions = async (req, res) => {
       {
         $lookup: {
           from: 'orderstatuses',
-          localField: '_id',
-          foreignField: 'collect_id',
+          let: { orderId: '$_id' },
+          pipeline: [
+            { $match: { $expr: { $eq: ['$collect_id', '$$orderId'] } } },
+            { $sort: { updatedAt: -1, payment_time: -1, createdAt: -1 } },
+            { $limit: 1 }
+          ],
           as: 'orderStatus'
         }
       },
-      {
-        $unwind: {
-          path: '$orderStatus',
-          preserveNullAndEmptyArrays: true
-        }
-      },
+      { $unwind: { path: '$orderStatus', preserveNullAndEmptyArrays: true } },
       {
         $project: {
           collect_id: '$_id',
@@ -37,14 +36,14 @@ const getTransactions = async (req, res) => {
           payment_time: '$orderStatus.payment_time',
           payment_mode: '$orderStatus.payment_mode',
           bank_reference: '$orderStatus.bank_reference',
+          payment_message: '$orderStatus.payment_message',
+          payment_details: '$orderStatus.payment_details',
           student_info: '$student_info',
           createdAt: '$createdAt',
           updatedAt: '$updatedAt'
         }
       },
-      {
-        $sort: { [sortBy]: sortDirection }
-      },
+      { $sort: { [sortBy]: sortDirection } },
       {
         $facet: {
           data: [
@@ -91,23 +90,20 @@ const getSchoolTransactions = async (req, res) => {
     const sortDirection = sortOrder === 'desc' ? -1 : 1;
 
     const pipeline = [
-      {
-        $match: { school_id: schoolId }
-      },
+      { $match: { school_id: schoolId } },
       {
         $lookup: {
           from: 'orderstatuses',
-          localField: '_id',
-          foreignField: 'collect_id',
+          let: { orderId: '$_id' },
+          pipeline: [
+            { $match: { $expr: { $eq: ['$collect_id', '$$orderId'] } } },
+            { $sort: { updatedAt: -1, payment_time: -1, createdAt: -1 } },
+            { $limit: 1 }
+          ],
           as: 'orderStatus'
         }
       },
-      {
-        $unwind: {
-          path: '$orderStatus',
-          preserveNullAndEmptyArrays: true
-        }
-      },
+      { $unwind: { path: '$orderStatus', preserveNullAndEmptyArrays: true } },
       {
         $project: {
           collect_id: '$_id',
@@ -120,14 +116,14 @@ const getSchoolTransactions = async (req, res) => {
           payment_time: '$orderStatus.payment_time',
           payment_mode: '$orderStatus.payment_mode',
           bank_reference: '$orderStatus.bank_reference',
+          payment_message: '$orderStatus.payment_message',
+          payment_details: '$orderStatus.payment_details',
           student_info: '$student_info',
           createdAt: '$createdAt',
           updatedAt: '$updatedAt'
         }
       },
-      {
-        $sort: { [sortBy]: sortDirection }
-      },
+      { $sort: { [sortBy]: sortDirection } },
       {
         $facet: {
           data: [
@@ -175,23 +171,20 @@ const getTransactionStatus = async (req, res) => {
     const { customOrderId } = req.params;
 
     const pipeline = [
-      {
-        $match: { custom_order_id: customOrderId }
-      },
+      { $match: { custom_order_id: customOrderId } },
       {
         $lookup: {
           from: 'orderstatuses',
-          localField: '_id',
-          foreignField: 'collect_id',
+          let: { orderId: '$_id' },
+          pipeline: [
+            { $match: { $expr: { $eq: ['$collect_id', '$$orderId'] } } },
+            { $sort: { updatedAt: -1, payment_time: -1, createdAt: -1 } },
+            { $limit: 1 }
+          ],
           as: 'orderStatus'
         }
       },
-      {
-        $unwind: {
-          path: '$orderStatus',
-          preserveNullAndEmptyArrays: true
-        }
-      },
+      { $unwind: { path: '$orderStatus', preserveNullAndEmptyArrays: true } },
       {
         $project: {
           collect_id: '$_id',
@@ -205,7 +198,7 @@ const getTransactionStatus = async (req, res) => {
           payment_mode: '$orderStatus.payment_mode',
           bank_reference: '$orderStatus.bank_reference',
           payment_message: '$orderStatus.payment_message',
-          error_message: '$orderStatus.error_message',
+          payment_details: '$orderStatus.payment_details',
           student_info: '$student_info',
           createdAt: '$createdAt',
           updatedAt: '$updatedAt'

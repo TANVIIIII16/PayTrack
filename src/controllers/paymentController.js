@@ -183,30 +183,46 @@ const getPaymentStatus = async (req, res) => {
         );
 
         if (externalStatusResponse.data) {
-          // Update local status if external status is different
-          const externalStatus = externalStatusResponse.data.status.toLowerCase();
-          if (orderStatus && orderStatus.status !== externalStatus) {
-            orderStatus.status = externalStatus;
-            orderStatus.payment_details = externalStatusResponse.data.details?.payment_methods || 'N/A';
+          // Normalize external response and persist more fields
+          const ex = externalStatusResponse.data;
+          const normalized = {
+            status: (ex.status || '').toLowerCase(),
+            amount: ex.amount ?? orderStatus?.order_amount ?? null,
+            payment_methods: ex.details?.payment_methods || ex.payment_method || orderStatus?.payment_mode || null,
+            transaction_id: ex.transaction_id || ex.bank_reference || null,
+            message: ex.message || ex.payment_message || null
+          };
+
+          if (orderStatus) {
+            if (normalized.status) orderStatus.status = normalized.status;
+            if (normalized.payment_methods != null) orderStatus.payment_mode = normalized.payment_methods;
+            if (normalized.transaction_id != null) orderStatus.bank_reference = normalized.transaction_id;
+            if (normalized.message != null) orderStatus.payment_message = normalized.message;
+            if (normalized.amount != null) {
+              orderStatus.order_amount = normalized.amount;
+              if (normalized.status === 'success') {
+                orderStatus.transaction_amount = normalized.amount;
+              }
+            }
             await orderStatus.save();
           }
 
           logger.info('External payment status retrieved', { 
             orderId: customOrderId,
-            externalStatus,
+            externalStatus: normalized.status,
             collectRequestId: order.external_collect_id
           });
 
           return successResponse(res, HTTP_STATUS.OK, 'Payment status retrieved successfully', {
             order_id: customOrderId,
             collect_request_id: order.external_collect_id,
-            status: externalStatus,
-            amount: externalStatusResponse.data.amount,
-            payment_details: externalStatusResponse.data.details?.payment_methods || 'N/A',
+            status: normalized.status || orderStatus?.status || PAYMENT_STATUS.PENDING,
+            amount: normalized.amount ?? orderStatus?.order_amount ?? null,
+            payment_details: normalized.payment_methods || 'N/A',
             payment_time: orderStatus?.payment_time || null,
             order_amount: orderStatus?.order_amount || null,
             transaction_amount: orderStatus?.transaction_amount || null,
-            external_jwt: externalStatusResponse.data.jwt
+            external_jwt: ex.jwt
           });
         }
       } catch (externalError) {
@@ -226,7 +242,10 @@ const getPaymentStatus = async (req, res) => {
       payment_details: orderStatus?.payment_details || 'N/A',
       payment_time: orderStatus?.payment_time || null,
       order_amount: orderStatus?.order_amount || null,
-      transaction_amount: orderStatus?.transaction_amount || null
+      transaction_amount: orderStatus?.transaction_amount || null,
+      bank_reference: orderStatus?.bank_reference || null,
+      payment_message: orderStatus?.payment_message || null,
+      payment_mode: orderStatus?.payment_mode || null
     });
   } catch (error) {
     logger.error('Failed to get payment status', { 
